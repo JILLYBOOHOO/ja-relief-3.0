@@ -89,13 +89,13 @@
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-black uppercase tracking-wider" [ngClass]="{'text-[#ba1a1a]': update.status === 'danger', 'text-[#7c5800]': update.status === 'warning', 'text-blue-500': update.status === 'info'}">{{ update.status }}</span>
+                                    <button (click)="openEditModal(update)" class="text-[#005c37] hover:bg-[#005c37]/10 p-2.5 rounded-xl transition-all">
+                                        <span class="material-symbols-outlined text-lg">edit_square</span>
+                                    </button>
                                 </div>
                                 <p class="text-sm font-bold text-[#191c1e] leading-snug mt-0.5">{{ update.title }}</p>
                                 <p class="text-[10px] text-[#3e4941] mt-1 font-semibold uppercase tracking-tight">Updated {{ update.time }}</p>
                             </div>
-                            <button class="text-[#005c37] hover:bg-[#005c37]/10 p-2.5 rounded-xl transition-all">
-                                <span class="material-symbols-outlined text-lg">edit_square</span>
-                            </button>
                         </div>
                     </ng-container>
                 </div>
@@ -316,5 +316,88 @@
         </div>
     </section>
 
+    </div>
+
+    <!-- Edit Broadcast Modal -->
+    <div *ngIf="isEditModalOpen" class="fixed inset-0 z-[1000] flex items-center justify-center p-6 sm:p-12">
+        <div class="absolute inset-0 bg-[#3e4941]/40 backdrop-blur-sm" (click)="closeEditModal()"></div>
+        <div class="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl border border-[#becabf]/30 flex flex-col max-h-[90vh] overflow-hidden transform transition-all scale-100">
+            <!-- Modal Header -->
+            <div class="p-8 border-b border-[#becabf]/20 flex items-center justify-between bg-[#f8faf9]">
+                <div class="space-y-1">
+                    <h3 class="text-2xl font-black font-[Georgia,serif] tracking-tight">Edit Operational Broadcast</h3>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-[#005c37] flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-[#005c37] animate-pulse"></span>
+                        Direct Transmission Sync Active
+                    </p>
+                </div>
+                <button (click)="closeEditModal()" class="w-10 h-10 rounded-xl hover:bg-white hover:shadow-sm flex items-center justify-center transition-all">
+                    <span class="material-symbols-outlined text-slate-400">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="flex-grow overflow-y-auto p-8 custom-scrollbar">
+                <form [formGroup]="editForm" (ngSubmit)="onUpdateSave()" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-[#3e4941] pl-1">Broadcast Title</label>
+                            <input class="w-full bg-[#f8faf9] border border-[#becabf]/30 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-[#005c37] outline-none transition-all" type="text" formControlName="title">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-[#3e4941] pl-1">Target Source</label>
+                            <input class="w-full bg-[#f8faf9] border border-[#becabf]/30 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-[#005c37] outline-none transition-all" type="text" formControlName="source">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-[#3e4941] pl-1">Tactical Priority</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="cursor-pointer group">
+                                <input type="radio" value="info" formControlName="status" class="hidden">
+                                <div class="p-3 rounded-2xl border text-center transition-all font-black text-[10px] uppercase tracking-widest"
+                                     [ngClass]="editForm.get('status')?.value === 'info' ? 'bg-[#96f6bd] border-[#005c37] text-[#005c37]' : 'bg-[#f8faf9] border-[#becabf]/20 text-[#3e4941] group-hover:border-[#005c37]/30'">
+                                    Information
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" value="warning" formControlName="status" class="hidden">
+                                <div class="p-3 rounded-2xl border text-center transition-all font-black text-[10px] uppercase tracking-widest"
+                                     [ngClass]="editForm.get('status')?.value === 'warning' ? 'bg-[#ffae00] border-[#7c5800] text-[#1d211e]' : 'bg-[#f8faf9] border-[#becabf]/20 text-[#3e4941] group-hover:border-[#ffae00]/40'">
+                                    Warning
+                                </div>
+                            </label>
+                            <label class="cursor-pointer group">
+                                <input type="radio" value="danger" formControlName="status" class="hidden">
+                                <div class="p-3 rounded-2xl border text-center transition-all font-black text-[10px] uppercase tracking-widest"
+                                     [ngClass]="editForm.get('status')?.value === 'danger' ? 'bg-[#ba1a1a] border-[#ba1a1a] text-white shadow-lg shadow-[#ba1a1a]/20' : 'bg-[#f8faf9] border-[#becabf]/20 text-[#3e4941] group-hover:border-[#ba1a1a]/40'">
+                                    Critical
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-[#3e4941] pl-1">Detailed Situation Briefing</label>
+                        <textarea class="w-full bg-[#f8faf9] border border-[#becabf]/30 rounded-2xl p-4 text-sm font-medium h-32 focus:ring-2 focus:ring-[#005c37] outline-none transition-all resize-none" formControlName="content"></textarea>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-8 border-t border-[#becabf]/20 flex items-center justify-between bg-[#f8faf9]">
+                <button type="button" (click)="deleteUpdate(editingUpdate?._id || editingUpdate!.id)" class="px-6 py-3 rounded-xl border border-[#ba1a1a]/40 text-[#ba1a1a] text-[10px] font-black uppercase tracking-widest hover:bg-[#ba1a1a] hover:text-white transition-all shadow-sm">
+                    Retract Broadcast
+                </button>
+                <div class="flex items-center gap-4">
+                    <button type="button" (click)="closeEditModal()" class="px-6 py-3 rounded-xl border border-[#becabf]/40 text-[#3e4941] text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all">
+                        Cancel
+                    </button>
+                    <button type="button" (click)="onUpdateSave()" class="bg-[#005c37] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-[#005c37]/20 hover:bg-[#004d2e] transition-all">
+                        Commit Updates
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </main>

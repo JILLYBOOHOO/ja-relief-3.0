@@ -44,6 +44,19 @@ export class UpdateService {
         this.updatesSubject.next([newUpdate, ...current]);
     }
 
+    updateUpdate(updatedUpdate: AlertUpdate) {
+        const current = this.updatesSubject.value;
+        const index = current.findIndex(u => u.id === updatedUpdate.id);
+        if (index !== -1) {
+            const nextUpdates = [...current];
+            nextUpdates[index] = {
+                ...updatedUpdate,
+                time: `Last Revised: ${new Date().toLocaleString()}`
+            };
+            this.updatesSubject.next(nextUpdates);
+        }
+    }
+
     deleteUpdate(id: string) {
         const filtered = this.updatesSubject.value.filter(u => u.id !== id);
         this.updatesSubject.next(filtered);

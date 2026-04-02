@@ -13,9 +13,12 @@ import { ImpactRequestService, ImpactRequest, RequestItem } from '../../services
 })
 export class AdminDashboardComponent implements OnInit {
     updateForm: FormGroup;
+    editForm: FormGroup;
     currentWeather: WeatherState = 'sunny';
     updates: AlertUpdate[] = [];
     allRequests: ImpactRequest[] = [];
+    isEditModalOpen = false;
+    editingUpdate: AlertUpdate | null = null;
 
     constructor(
         private fb: FormBuilder,
@@ -28,6 +31,14 @@ export class AdminDashboardComponent implements OnInit {
         this.updateForm = this.fb.group({
             title: ['', Validators.required],
             source: ['ODPEM', Validators.required],
+            content: ['', Validators.required],
+            status: ['info', Validators.required]
+        });
+
+        this.editForm = this.fb.group({
+            id: [''],
+            title: ['', Validators.required],
+            source: ['', Validators.required],
             content: ['', Validators.required],
             status: ['info', Validators.required]
         });
@@ -54,6 +65,30 @@ export class AdminDashboardComponent implements OnInit {
         this.weatherService.setWeather(state as WeatherState);
     }
 
+    openEditModal(update: AlertUpdate) {
+        this.editingUpdate = update;
+        this.editForm.patchValue({
+            id: update.id,
+            title: update.title,
+            source: update.source,
+            content: update.content,
+            status: update.status
+        });
+        this.isEditModalOpen = true;
+    }
+
+    closeEditModal() {
+        this.isEditModalOpen = false;
+        this.editingUpdate = null;
+    }
+
+    onUpdateSave() {
+        if (this.editForm.valid) {
+            this.updateService.updateUpdate(this.editForm.value);
+            this.closeEditModal();
+        }
+    }
+
     onSubmit() {
         if (this.updateForm.valid) {
             this.updateService.addUpdate(this.updateForm.value);
@@ -62,7 +97,10 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     deleteUpdate(id: string) {
-        this.updateService.deleteUpdate(id);
+        if (confirm('Delete this broadcast?')) {
+            this.updateService.deleteUpdate(id);
+            if (this.isEditModalOpen) this.closeEditModal();
+        }
     }
 
     markAsReceived(request: ImpactRequest, item: RequestItem) {
